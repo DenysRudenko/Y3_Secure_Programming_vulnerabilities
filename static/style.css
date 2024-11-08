@@ -1,7 +1,5 @@
 /* A Free Design by Bryant Smith (bryantsmith.com) */
 
-
-
 body {
     margin: 0;
     padding: 0;
@@ -9,8 +7,7 @@ body {
     font: 12px Arial, Helvetica, sans-serif;
     font-size: 13px;
     color: #061C37;
-    background-image: url(images/background.jpg);
-    background-repeat: no-repeat;
+    background: url(images/background.jpg) no-repeat 50%/cover;
 }
 
 * {

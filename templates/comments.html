@@ -30,7 +30,7 @@
     <h3>All Comments</h3>
     <ul>
         {% for comment in comments %}
-            <li><strong>{{ comment.username }}</strong>: {{ comment.text|safe }}</li>
+            <li><strong>{{ comment.username }}</strong>: {{ comment.text }}</li>
         {% endfor %}
     </ul>
 {% endblock %}

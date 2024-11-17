@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import bleach
 from flask import Flask, render_template, request, Response, redirect, url_for, flash, session, send_from_directory, abort, send_file
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
@@ -67,7 +68,9 @@ def redirect_handler():
 def comments():
     if request.method == 'POST':
         username = request.form['username']
-        comment_text = request.form['comment']
+        # Here we will be cleaning the user inout using Bleach Library
+        # This will Sanitize the user input and take out any harmful code
+        comment_text = bleach.clean(request.form['comment'])
 
         # Insert comment into the database
         insert_comment_query = text("INSERT INTO comments (username, text) VALUES (:username, :text)")

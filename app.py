@@ -136,6 +136,8 @@ def search():
 def forum():
     return render_template('forum.html')
 
+
+
 # Add login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -143,10 +145,10 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        query = text(f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'")
-        user = db.session.execute(query).fetchone()
+        query = text("SELECT * FROM users WHERE username = :username")
+        user = db.session.execute(query, {'username': username}).fetchone()
 
-        if user:
+        if user and user.password == password:
             session['user_id'] = user.id
             flash('Login successful!', 'success')
             return redirect(url_for('profile', user_id=user.id))
@@ -155,9 +157,6 @@ def login():
             return render_template('login.html', error=error)
 
     return render_template('login.html')
-
-
-
 
 
 # Logout route

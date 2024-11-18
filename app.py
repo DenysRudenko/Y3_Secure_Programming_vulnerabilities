@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import bleach
+import re
 from flask import Flask, render_template, request, Response, redirect, url_for, flash, session, send_from_directory, abort, send_file
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
@@ -129,7 +130,9 @@ from flask import request
 
 @app.route('/search', methods=['GET'])
 def search():
-    query = request.args.get('query')
+    query = request.args.get('query', '')
+    if not re.match(r"^[a-zA-Z0-9 ]*$", query):
+        query = "Invalid input."
     return render_template('search.html', query=query)
 
 @app.route('/forum')
@@ -157,6 +160,9 @@ def login():
             return render_template('login.html', error=error)
 
     return render_template('login.html')
+
+
+
 
 
 # Logout route

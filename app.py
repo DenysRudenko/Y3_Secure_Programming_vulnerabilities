@@ -65,7 +65,10 @@ def sitemap():
     
 @app.route('/admin_panel')
 def admin_panel():
-    return render_template('admin_panel.html')
+    if 'user_role' in session and session['user_role'] == 'admin':
+        return render_template('admin_panel.html')
+    else:
+        return "Unauthorized access", 403
 
 # Route to handle redirects based on the destination query parameter
 @app.route('/redirect', methods=['GET'])

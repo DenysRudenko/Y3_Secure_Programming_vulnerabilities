@@ -22,7 +22,7 @@
                 <li><a href="{{ url_for('search') }}">Search</a></li>
                 <li><a href="{{ url_for('comments') }}">Comments</a></li>
                 {% if 'user_id' in session %}
-                <li><a href="{{ url_for('download_page') }}">Downloads</a></li>
+                <li><a href="{{ url_for('downloads') }}">Downloads</a></li>
                 {% endif %}
                 <li>
                     {% if 'user_id' in session %}

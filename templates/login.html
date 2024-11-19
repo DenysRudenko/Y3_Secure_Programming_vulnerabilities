@@ -7,6 +7,7 @@
     style="max-width: 400px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; background-color: #f9f9f9;">
     <h2 style="text-align: center;">Login</h2>
     <form method="POST" action="{{ url_for('login') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div style="margin-bottom: 15px;">
             <label for="username" style="display: block; font-weight: bold; margin-bottom: 5px;">Username:</label>
             <input type="text" id="username" name="username" required

@@ -78,12 +78,14 @@ def admin_panel():
 # Route to handle redirects based on the destination query parameter
 @app.route('/redirect', methods=['GET'])
 def redirect_handler():
-    destination = request.args.get('destination')
+    destination = request.args.get('destination', '')
 
-    if destination:
-        return redirect(destination)
+    allowed_routes = ["index", "quotes", "search", "comments", "login", "sitemap", "downloads"]
+
+    if destination in allowed_routes:
+        return redirect(url_for(destination))
     else:
-        return "Invalid destination", 400
+        return abort(403, "Unauthorized redirect attempt!")
 
 
 @app.route('/comments', methods=['GET', 'POST'])
@@ -127,7 +129,7 @@ def download():
         return "Permission denied while accessing the file", 403
 
         
-@app.route('/downloads', methods=['GET'])
+@app.route('/downloads', methods=['GET'], endpoint='downloads')
 def download_page():
     if 'user_id' not in session:
         return redirect(url_for('login'))

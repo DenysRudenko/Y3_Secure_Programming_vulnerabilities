@@ -8,9 +8,14 @@ from sqlalchemy import text
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from datetime import datetime, timedelta, timezone
+from flask_wtf.csrf import CSRFProtect
 
 app = Flask(__name__)
-app.secret_key = 'trump123'  # Set a secure secret key
+
+csrf = CSRFProtect(app)
+app.config['SECRET_KEY'] = 'trump123'
+
+
 
 # brute force
 limiter = Limiter(

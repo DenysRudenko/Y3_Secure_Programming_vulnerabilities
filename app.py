@@ -5,10 +5,23 @@ import re
 from flask import Flask, render_template, request, Response, redirect, url_for, flash, session, send_from_directory, abort, send_file
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
-
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from datetime import datetime, timedelta, timezone
 
 app = Flask(__name__)
 app.secret_key = 'trump123'  # Set a secure secret key
+
+# brute force
+limiter = Limiter(
+    key_func=lambda: request.form.get('username', get_remote_address()),
+    app=app,
+    default_limits=["200 per day", "50 per hour"]
+)
+
+lockout_until = datetime.now(timezone.utc) + timedelta(minutes=15)
+failed_attempts = {}
+
 
 # Configure the SQLite database
 db_path = os.path.join(os.path.dirname(__file__), 'trump.db')
@@ -139,31 +152,42 @@ def search():
 def forum():
     return render_template('forum.html')
 
-
-
 # Add login route
 @app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute", methods=["POST"], error_message="Too many login attempts for this user. Try again later.")
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
 
+        # Check lockout for this username
+        if username in failed_attempts:
+            attempts, lockout_until = failed_attempts[username]
+            if lockout_until and datetime.now(timezone.utc) < lockout_until:
+                error = f'Account is locked. Try again at {lockout_until}.'
+                return render_template('login.html', error=error)
+
         query = text("SELECT * FROM users WHERE username = :username")
         user = db.session.execute(query, {'username': username}).fetchone()
 
         if user and user.password == password:
+            failed_attempts.pop(username, None)
             session['user_id'] = user.id
             flash('Login successful!', 'success')
             return redirect(url_for('profile', user_id=user.id))
         else:
+            # Increment failed attempts
+            attempts, lockout_until = failed_attempts.get(username, (0, None))
+            attempts += 1
+            lockout_until = datetime.now(timezone.utc) + timedelta(minutes=15) if attempts >= 5 else None
+            failed_attempts[username] = (attempts, lockout_until)
+
             error = 'Invalid Credentials. Please try again.'
+            if lockout_until:
+                error += ' Too many failed attempts. Account locked for 15 minutes.'
             return render_template('login.html', error=error)
 
     return render_template('login.html')
-
-
-
-
 
 # Logout route
 @app.route('/logout')
@@ -172,7 +196,6 @@ def logout():
     flash('You were successfully logged out', 'success')
     return redirect(url_for('index'))
     
-from flask import session
 
 
 if __name__ == '__main__':

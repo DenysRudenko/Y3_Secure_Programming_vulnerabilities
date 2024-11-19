@@ -102,32 +102,31 @@ def comments():
 
 @app.route('/download', methods=['GET'])
 def download():
-    # Get the filename from the query parameter
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
     file_name = request.args.get('file', '')
 
-    # Set base directory to where your docs folder is located
     base_directory = os.path.join(os.path.dirname(__file__), 'docs')
 
-    # Construct the file path to attempt to read the file
-    file_path = os.path.abspath(os.path.join(base_directory, file_name))
+    ALLOWED_FILES = {'lies.pdf', 'platinum-plan.pdf'}
 
-    # Ensure that the file path is within the base directory
-    #if not file_path.startswith(base_directory):
-     #   return "Unauthorized access attempt!", 403
+    if file_name not in ALLOWED_FILES:
+        return abort(403, "File not authorized!")
 
-    # Try to open the file securely
     try:
-        with open(file_path, 'rb') as f:
-            response = Response(f.read(), content_type='application/octet-stream')
-            response.headers['Content-Disposition'] = f'attachment; filename="{os.path.basename(file_path)}"'
-            return response
+        return send_from_directory(base_directory, file_name, as_attachment=True)
     except FileNotFoundError:
         return "File not found", 404
     except PermissionError:
         return "Permission denied while accessing the file", 403
+
         
 @app.route('/downloads', methods=['GET'])
 def download_page():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
     return render_template('download.html')
 
 
@@ -194,6 +193,7 @@ def login():
             return render_template('login.html', error=error)
 
     return render_template('login.html')
+
 
 # Logout route
 @app.route('/logout')

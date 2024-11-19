@@ -130,16 +130,19 @@ def download_page():
 
 @app.route('/profile/<int:user_id>', methods=['GET'])
 def profile(user_id):
-    query_user = text(f"SELECT * FROM users WHERE id = {user_id}")
-    user = db.session.execute(query_user).fetchone()
+    if 'user_id' not in session or session['user_id'] != user_id:
+        return "Unauthorized access to profile.", 403 
+
+    query_user = text("SELECT * FROM users WHERE id = :user_id")
+    user = db.session.execute(query_user, {'user_id': user_id}).fetchone()
 
     if user:
-        query_cards = text(f"SELECT * FROM carddetail WHERE id = {user_id}")
-        cards = db.session.execute(query_cards).fetchall()
+        query_cards = text("SELECT * FROM carddetail WHERE id = :user_id")
+        cards = db.session.execute(query_cards, {'user_id': user_id}).fetchall()
         return render_template('profile.html', user=user, cards=cards)
     else:
-        return "User not found or unauthorized access.", 403
-from flask import request
+        return "User not found.", 404
+
 
 @app.route('/search', methods=['GET'])
 def search():

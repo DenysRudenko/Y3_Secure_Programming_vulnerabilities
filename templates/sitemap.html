@@ -13,7 +13,9 @@
         {% if 'user_id' in session %}
         <li><a href="{{ url_for('redirect_handler', destination='downloads') }}">Downloads</a></li>
         {% endif %}
-        <li style="display: none;"><a href="/admin_panel">Admin Panel</a></li>
+        {% if 'user_role' in session and session['user_role'] == 'admin' %}
+        <li><a href="{{ url_for('admin_panel') }}">Admin Panel</a></li>
+        {% endif %}
     </ul>
 </div>
 {% endblock %}
